@@ -1,8 +1,9 @@
 package br.com.fiap.irrigacao.Controllers;
 
-import br.com.fiap.irrigacao.DTO.IrrigacaoDTO;
-import br.com.fiap.irrigacao.Model.Irrigacao;
-import br.com.fiap.irrigacao.Services.IrrigacaoService;
+import br.com.fiap.irrigacao.DTO.TorneiraDTO;
+import br.com.fiap.irrigacao.Model.Torneira;
+import br.com.fiap.irrigacao.Services.TorneiraService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,9 +16,9 @@ import java.net.URISyntaxException;
 
 @RestController
 @RequestMapping("/irrigacao")
-public class IrrigacaoController {
+public class TorneiraController {
     @Autowired
-    private IrrigacaoService service;
+    private TorneiraService service;
 
     @GetMapping()
     public Page<IrrigacaoDTO> getAllIrrigacoes(@PageableDefault(size = 10) Pageable paginacao){
