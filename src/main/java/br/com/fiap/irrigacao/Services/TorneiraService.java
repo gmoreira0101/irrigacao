@@ -1,13 +1,17 @@
-package br.com.fiap.pedidos.service;
+package br.com.fiap.irrigacao.Services;
 
+import br.com.Exception.TorneiraNaoEncontradoException;
 import br.com.fiap.irrigacao.DTO.TorneiraDTO;
-import br.com.fiap.irrigacao.DTO.TorneiraExibicaoDto;
-import br.com.fiap.irrigacao.Exception.TorneiraNaoEncontradoException;
+import br.com.fiap.irrigacao.DTO.TorneiraExibicaoDTO;
 import br.com.fiap.irrigacao.Model.StatusTorneira;
 import br.com.fiap.irrigacao.Model.Torneira;
 import br.com.fiap.irrigacao.Repository.TorneiraRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,54 +23,64 @@ public class TorneiraService {
     @Autowired
     private TorneiraRepository torneiraRepository;
 
-    public TorneiraExibicaoDto criar(TorneiraDTO torneiraDTO){
+    public ResponseEntity criar(TorneiraDTO torneiraDTO){
 
         Torneira torneira = new Torneira();
         BeanUtils.copyProperties(torneiraDTO, torneira);
 
-        Torneira.setStatusTorneira(StatusTorneira.Desligado);
-        Torneira torneiraCriado = torneiraRepository.save(torneira);
+        torneira.setStatusTorneira(String.valueOf(StatusTorneira.Desligado));
 
-        return new TorneiraExibicaoDto(torneiraCriado);
+        Torneira torneiraCriada = torneiraRepository.save(torneira);
+
+        return new ResponseEntity( new TorneiraExibicaoDTO(torneiraCriada), HttpStatus.CREATED);
 
     }
 
-    public TorneiraExibicaoDto buscarPorIdTorneira(Long idTorneira){
-        Optional<Torneira> pedidoOptional = TorneiraRepository.findById(idTorneira);
+    public TorneiraExibicaoDTO buscarPorIdTorneira(Long idTorneira){
+        Optional<Torneira> torneiraOptional = torneiraRepository.findById(idTorneira);
 
-        if (pedidoOptional.isPresent()){
-            return new PedidoExibicaoDto(pedidoOptional.get());
+        if (torneiraOptional.isPresent()){
+            return new TorneiraExibicaoDTO(torneiraOptional.get());
         } else {
-            throw new PedidoNaoEncontradoException(String.format("Pedido %s não existe!", numeroPedido));
+            throw new TorneiraNaoEncontradoException(String.format("Torneira com id %s não existe!", idTorneira));
         }
     }
 
-    public List<PedidoExibicaoDto> exibirTodosOsPedidos(){
-        return pedidoRepository
+    public List<TorneiraExibicaoDTO> exibirTodasAsTorneiras(){
+        return torneiraRepository
                 .findAll()
                 .stream()
-                .map(PedidoExibicaoDto::new)
+                .map(TorneiraExibicaoDTO::new)
                 .toList();
     }
 
-    public void excluir(Long numeroPedido){
+    public ResponseEntity excluir(Long idTorneira){
 
-        Optional<Pedido> pedidoOptional = pedidoRepository.findById(numeroPedido);
+        Optional<Torneira> torneiraOptional = torneiraRepository.findById(idTorneira);
 
-        if (pedidoOptional.isPresent()){
-            pedidoRepository.delete(pedidoOptional.get());
+        if (torneiraOptional.isPresent()){
+            torneiraRepository.delete(torneiraOptional.get());
+            return ResponseEntity.accepted().body(String.format("Torneira com ID %s deletada! :D", idTorneira));
         } else {
-            throw new PedidoNaoEncontradoException(String.format("Pedido %s não existe!", numeroPedido));
+            throw new TorneiraNaoEncontradoException(String.format("Pedido %s não existe!", idTorneira));
         }
-        Pedido pedido = new Pedido();
 
     }
 
-    public PedidoExibicaoDto atualizar(PedidoDto pedidoDto){
-        Pedido pedido = new Pedido();
-        BeanUtils.copyProperties(pedidoDto, pedido);
-        Pedido pedidoAtualizado = pedidoRepository.save(pedido);
-        return new PedidoExibicaoDto(pedidoAtualizado);
+    public ResponseEntity<TorneiraExibicaoDTO> atualizar(TorneiraDTO torneiraDTO) {
+        var id = torneiraDTO.getIdTorneira();
+        Optional<Torneira> torneiraOptional = torneiraRepository.findById(id.longValue());
+
+        Torneira torneiraAtualizada;
+        if (torneiraOptional.isPresent()) {
+            Torneira torneira = new Torneira();
+            BeanUtils.copyProperties(torneiraDTO, torneira);
+            torneiraAtualizada = torneiraRepository.save(torneira);
+            return ResponseEntity.ok().body(new TorneiraExibicaoDTO(torneiraAtualizada));
+
+        } else {
+            throw new TorneiraNaoEncontradoException(String.format("Torneira com id %s não existe!", torneiraDTO.getIdTorneira()));
+        }
     }
 
 }

@@ -20,14 +20,14 @@ import jakarta.persistence.*;
 public class Torneira {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_torneira")
+    @Column(name = "ID_TORNEIRA")
     private Long idTorneira;
     
     @Column(name = "status_torneira")
     private String statusTorneira;
     
-    @Column(name = "id_local")
-    private int idLocal;
+    @Column(name = "id_lugar")
+    private int idLugar;
 
 
     public void setStatusTorneira(String statusTorneira){
